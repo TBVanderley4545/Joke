@@ -2,16 +2,26 @@ package com.tbvanderleystudios.joke;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
 
 public class DelayedMessageService extends IntentService {
+
+    private Handler mHandler;
 
     public static final String TAG = DelayedMessageService.class.getSimpleName();
     public static final String EXTRA_MESSAGE = "message";
 
     public DelayedMessageService() {
         super("DelayedMessageService");
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        mHandler = new Handler();
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -29,6 +39,12 @@ public class DelayedMessageService extends IntentService {
     }
 
     private void showText(final String text) {
-        Log.v(TAG, "The message is: " + text);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
+                toast.show();
+            }
+        });
     }
 }

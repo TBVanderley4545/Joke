@@ -24,6 +24,9 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        delayedMessageServiceButton.setOnClickListener(listener);
+        // This if statement was created to remove the possibility of a null pointer exception.
+        if(delayedMessageServiceButton != null) {
+            delayedMessageServiceButton.setOnClickListener(listener);
+        }
     }
 }
