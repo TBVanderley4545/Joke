@@ -1,6 +1,11 @@
 package com.tbvanderleystudios.joke;
 
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
@@ -9,20 +14,14 @@ import android.widget.Toast;
 
 public class DelayedMessageService extends IntentService {
 
-    private Handler mHandler;
-
     public static final String TAG = DelayedMessageService.class.getSimpleName();
     public static final String EXTRA_MESSAGE = "message";
+    public static final int NOTIFICATION_ID = 4545;
 
     public DelayedMessageService() {
         super("DelayedMessageService");
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        mHandler = new Handler();
-        return super.onStartCommand(intent, flags, startId);
-    }
 
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -39,12 +38,29 @@ public class DelayedMessageService extends IntentService {
     }
 
     private void showText(final String text) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
-                toast.show();
-            }
-        });
+        Intent intent = new Intent(this, MainActivity.class);
+
+        // Create TaskStackBuilder and pass it the intent that was created
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addNextIntent(intent);
+
+        // Get the PendingIntent from the TaskStackBuilder
+        PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Add the intent to the Notification and send the notification
+        Notification notification = new Notification.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(getString(R.string.app_name))
+                .setAutoCancel(true)
+                .setPriority(Notification.PRIORITY_MAX)
+                .setDefaults(Notification.DEFAULT_VIBRATE)
+                .setContentIntent(pendingIntent)
+                .setContentText(text)
+                .build();
+
+        // Create a NotificationManager to handle the Notification
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(NOTIFICATION_ID, notification);
     }
 }
